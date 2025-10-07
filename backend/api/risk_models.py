@@ -1,3 +1,4 @@
+from unittest import result
 import pandas as pd
 import numpy as np
 from scipy.stats import norm
@@ -9,7 +10,7 @@ import torch
 import torch.nn as nn
 import warnings
 import os
-from fetch_data import prepare_data
+from backend.api.fetch_data import prepare_data
 
 warnings.filterwarnings("ignore")
 
@@ -241,6 +242,22 @@ def run_lstm(returns):
 # ============================================================
 
 
+def convert_numpy_types(obj, round_to=5):
+    """Recursively convert NumPy types to native Python types and round floats."""
+    import numpy as np
+
+    if isinstance(obj, dict):
+        return {k: convert_numpy_types(v, round_to) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_numpy_types(i, round_to) for i in obj]
+    elif isinstance(obj, (np.float32, np.float64, float)):
+        return round(float(obj), round_to)
+    elif isinstance(obj, (np.int32, np.int64, int)):
+        return int(obj)
+    else:
+        return obj
+
+
 def get_risk_metrics(ticker, period="1y", interval="1d"):
     """
     Fetch historical data, compute statistical risk metrics, and generate
@@ -276,12 +293,12 @@ def get_risk_metrics(ticker, period="1y", interval="1d"):
     # Return a unified structured result
     result = {
         "ticker": ticker,
-        "historical_volatility": round(hist_vol, 5),
-        "VaR_95": round(var_95, 5),
-        "CVaR_95": round(cvar_95, 5),
-        "forecasted_volatility_garch": round(garch_vol, 5),
-        "forecasted_volatility_xgboost": round(xgb_vol, 5),
-        "forecasted_volatility_lstm": round(lstm_vol, 5),
+        "historical_volatility": float(hist_vol),
+        "VaR_95": float(var_95),
+        "CVaR_95": float(cvar_95),
+        "forecasted_volatility_garch": float(garch_vol),
+        "forecasted_volatility_xgboost": float(xgb_vol),
+        "forecasted_volatility_lstm": float(lstm_vol),
     }
 
-    return result
+    return convert_numpy_types(result)
