@@ -1,0 +1,9 @@
+{
+  "python.defaultInterpreterPath": "D:\\RiskIQ\\backend\\venv\\Scripts\\python.exe",
+  "editor.formatOnSave": true,
+  "python.analysis.autoImportCompletions": true,
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/.venv": true
+  }
+}
