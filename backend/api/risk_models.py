@@ -29,13 +29,11 @@ def compute_volatility(returns):
     Volatility is calculated as the standard deviation of daily returns
     multiplied by the square root of 252 (approx. trading days in a year).
 
-    Parameters
-    ----------
+    Parameters:
     returns : pd.Series
         Series of daily percentage returns.
 
-    Returns
-    -------
+    Returns:
     float
         Annualized volatility estimate.
     """
@@ -52,15 +50,13 @@ def compute_var(returns, confidence_level=0.95):
     Value at Risk (VaR) estimates the maximum expected loss for a given confidence level
     over a specified time horizon.
 
-    Parameters
-    ----------
+    Parameters:
     returns : pd.Series
         Series of returns.
     confidence_level : float, optional
         Confidence level for VaR calculation (default = 0.95).
 
-    Returns
-    -------
+    Returns:
     float
         Value at Risk (negative value indicates potential loss).
     """
@@ -77,15 +73,13 @@ def compute_cvar(returns, confidence=0.95):
     CVaR measures the expected loss beyond the Value at Risk (VaR) threshold —
     essentially, the average of the worst-case losses.
 
-    Parameters
-    ----------
+    Parameters:
     returns : pd.Series
         Series of returns.
     confidence : float, optional
         Confidence level (default = 0.95).
 
-    Returns
-    -------
+    Returns:
     float
         Conditional Value at Risk.
     """
@@ -106,13 +100,11 @@ def run_garch(returns):
     GARCH (Generalized Autoregressive Conditional Heteroskedasticity) models
     estimate time-varying volatility in financial time series.
 
-    Parameters
-    ----------
+    Parameters:
     returns : pd.Series
         Series of returns.
 
-    Returns
-    -------
+    Returns:
     float
         Forecasted volatility for the next period.
     """
@@ -137,13 +129,11 @@ def build_features(returns):
     - RollingMean: 20-day rolling mean of returns
     - Lag1, Lag2, Lag3: Previous return lags
 
-    Parameters
-    ----------
+    Parameters:
     returns : pd.Series
         Series of returns.
 
-    Returns
-    -------
+    Returns:
     pd.DataFrame
         DataFrame of features for the XGBoost model.
     """
@@ -166,13 +156,11 @@ def run_xgboost(returns):
 
     The model is pretrained and stored in 'backend/model_store/xgb_vol_model.joblib'.
 
-    Parameters
-    ----------
+    Parameters:
     returns : pd.Series
         Series of returns.
 
-    Returns
-    -------
+    Returns:
     float
         Predicted next-period volatility.
     """
@@ -221,13 +209,11 @@ def run_lstm(returns):
 
     The LSTM model is pretrained and stored in 'backend/model_store/lstm_vol_model.pth'.
 
-    Parameters
-    ----------
+    Parameters:
     returns : pd.Series
         Series of returns.
 
-    Returns
-    -------
+    Returns:
     float
         Predicted next-period volatility.
     """
@@ -262,8 +248,7 @@ def get_risk_metrics(ticker, period="1y", interval="1d"):
 
     This function serves as the central risk engine entry point.
 
-    Parameters
-    ----------
+    Parameters:
     ticker : str
         The stock ticker symbol.
     period : str, optional
@@ -271,9 +256,7 @@ def get_risk_metrics(ticker, period="1y", interval="1d"):
     interval : str, optional
         Data interval (default = "1d").
 
-    Returns
-    -------
-    dict
+    Returns:
         Dictionary containing all computed and forecasted metrics.
     """
     # Fetch and prepare data
@@ -302,14 +285,3 @@ def get_risk_metrics(ticker, period="1y", interval="1d"):
     }
 
     return result
-
-
-# Example usage:
-if __name__ == "__main__":
-
-    ticker = "AAPL"
-    period = "1y"
-    interval = "1d"
-    metrics = get_risk_metrics(ticker, period, interval)
-
-    print(metrics)
