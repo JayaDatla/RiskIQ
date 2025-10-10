@@ -16,6 +16,23 @@ It is deployed on **Hugging Face Spaces** using **Docker** for full control over
 ## 🧩 Deployment
 This app is containerized with Docker and runs on port **7860** (default Hugging Face Space port).
 
+
+---
+title: RiskIQ Backend
+emoji: 📈
+colorFrom: indigo
+colorTo: purple
+sdk: docker
+sdk_version: "1.0"
+app_file: Dockerfile
+pinned: false
+license: mit
+---
+
+# RiskIQ Backend
+
+This is the backend for the RiskIQ project, deployed as a Docker Space on Hugging Face.
+
 ### Run locally
 ```bash
 # Build Docker image
