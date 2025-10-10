@@ -1,2 +1,4 @@
+*.pt filter=lfs diff=lfs merge=lfs -text
+*.joblib filter=lfs diff=lfs merge=lfs -text
 backend/model_store/*.pt filter=lfs diff=lfs merge=lfs -text
 backend/model_store/*.joblib filter=lfs diff=lfs merge=lfs -text
