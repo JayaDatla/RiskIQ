@@ -260,37 +260,27 @@ def convert_numpy_types(obj, round_to=5):
 
 def get_risk_metrics(ticker, period="1y", interval="1d"):
     """
-    Fetch historical data, compute statistical risk metrics, and generate
-    volatility forecasts using GARCH, XGBoost, and LSTM models.
-
-    This function serves as the central risk engine entry point.
-
-    Parameters:
-    ticker : str
-        The stock ticker symbol.
-    period : str, optional
-        Data period to fetch (default = "1y").
-    interval : str, optional
-        Data interval (default = "1d").
-
-    Returns:
-        Dictionary containing all computed and forecasted metrics.
+    Fetch historical data, compute statistical risk metrics, and generate volatility forecasts.
     """
-    # Fetch and prepare data
     hist = prepare_data(ticker, period, interval)
     returns = hist["Return"].dropna()
 
-    # Compute historical metrics
+    # --- Compute historical metrics ---
     hist_vol = compute_volatility(returns)
     var_95 = compute_var(returns)
     cvar_95 = compute_cvar(returns)
 
-    # Forecast future volatility
+    # --- Forecast future volatility ---
     garch_vol = run_garch(returns)
     xgb_vol = run_xgboost(returns)
     lstm_vol = run_lstm(returns)
 
-    # Return a unified structured result
+    # --- Prepare historical data for frontend charts ---
+    hist_chart = (
+        hist[["Date", "Close", "Return"]].dropna().tail(252)
+    )  # 1 year ~ 252 trading days
+    hist_chart["Date"] = hist_chart["Date"].astype(str)
+
     result = {
         "ticker": ticker,
         "historical_volatility": float(hist_vol),
@@ -299,6 +289,7 @@ def get_risk_metrics(ticker, period="1y", interval="1d"):
         "forecasted_volatility_garch": float(garch_vol),
         "forecasted_volatility_xgboost": float(xgb_vol),
         "forecasted_volatility_lstm": float(lstm_vol),
+        "historical_data": hist_chart.to_dict(orient="records"),
     }
 
     return convert_numpy_types(result)

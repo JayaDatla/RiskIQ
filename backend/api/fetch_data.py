@@ -2,7 +2,7 @@ import yfinance as yf
 import pandas as pd
 
 
-def fetch_stock_data(ticker, period="1yr", interval="1d"):
+def fetch_stock_data(ticker, period="1y", interval="1d"):
     """
     Fetch historical stock data for a given ticker symbol.
 
@@ -39,10 +39,10 @@ def compute_returns(hist):
     hist["Return"] = hist["Close"].pct_change()
     hist.dropna(inplace=True)
 
-    return hist["Return"]
+    return hist
 
 
-def prepare_data(ticker, period="1yr", interval="1d"):
+def prepare_data(ticker, period="1y", interval="1d"):
     """
     Fetch historical stock data and compute daily returns.
 
@@ -55,6 +55,6 @@ def prepare_data(ticker, period="1yr", interval="1d"):
     - pd.DataFrame: A DataFrame containing the historical stock data with returns.
     """
     hist = fetch_stock_data(ticker, period, interval)
-    hist["Return"] = compute_returns(hist)
+    hist = compute_returns(hist)
 
     return hist
