@@ -1,13 +1,3 @@
-title: RiskIQ Backend
-emoji: 📈
-colorFrom: indigo
-colorTo: purple
-sdk: fastapi
-sdk_version: "1.0"
-app_file: backend/api/app.py
-pinned: false
-license: mit
-
 # 🧠 RiskIQ Backend
 
 This is the **backend API** for the RiskIQ project — a Python-based system that provides stock data, analytics, and risk assessment services.  
