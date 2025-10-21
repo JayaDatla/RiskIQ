@@ -4,22 +4,22 @@ from typing import Dict, Optional
 
 
 def generate_ai_summary(
-    metrics_data: Dict, style: str = "concise", hf_token: Optional[str] = None
+    metrics_data: Dict, style: str = "detailed", perplexity_token: Optional[str] = None
 ) -> str:
     """
-    Generate AI summary from risk metrics.
+    Generate AI summary from risk metrics using Perplexity API.
 
     Args:
         metrics_data: Your metrics dict with 'portfolio_summary' and 'details'
-        style: 'concise' (default), 'detailed', or 'technical'
-        hf_token: Hugging Face token (or set HUGGINGFACE_TOKEN env var)
+        style: 'concise', 'detailed' (default), or 'technical'
+        perplexity_token: Perplexity API token (or set PERPLEXITY_API_KEY env var)
 
     Returns:
         Summary string with risk analysis
     """
 
-    # Get HF token
-    token = hf_token or os.getenv("HUGGINGFACE_TOKEN")
+    # Get Perplexity token
+    token = perplexity_token or os.getenv("PERPLEXITY_API_KEY")
 
     # If no token, return rule-based summary (fallback)
     if not token:
@@ -29,18 +29,18 @@ def generate_ai_summary(
         # Create prompt
         prompt = _create_prompt(metrics_data, style)
 
-        # Call HF API
-        summary = _call_llm(prompt, token)
+        # Call Perplexity API
+        summary = _call_perplexity(prompt, token)
 
         return summary
 
     except Exception as e:
-        print(f"LLM failed, using fallback: {e}")
+        print(f"Perplexity API failed: {e}. Using fallback.")
         return _fallback_summary(metrics_data)
 
 
 def _create_prompt(metrics_data: Dict, style: str) -> str:
-    """Create prompt based on single ticker or portfolio."""
+    """Create balanced, accessible prompts for both retail and professional investors."""
 
     details = metrics_data.get("details", [])
     portfolio = metrics_data.get("portfolio_summary", {})
@@ -52,70 +52,178 @@ def _create_prompt(metrics_data: Dict, style: str) -> str:
         vol = d["historical_volatility"]
         var = d["VaR_95"]
         cvar = d["CVaR_95"]
+        garch = d.get("forecasted_volatility_garch")
+        xgb = d.get("forecasted_volatility_xgboost")
+        lstm = d.get("forecasted_volatility_lstm")
 
         if style == "concise":
-            return f"""Analyze this stock in 2-3 sentences:
-{ticker}: Volatility={vol:.4f}, VaR(95%)={var:.4f}, CVaR={cvar:.4f}
-Explain risk level for investors."""
+            return f"""Analyze this stock's risk in 3 clear sentences for both retail and professional investors.
+
+Stock: {ticker}
+• Volatility: {vol:.4f} ({vol*100:.2f}%)
+• VaR (95%): {var:.4f} ({var*100:.2f}%)
+• CVaR (95%): {cvar:.4f} ({cvar*100:.2f}%)
+
+Provide:
+1. Risk level classification (LOW/MODERATE/HIGH/EXTREME)
+2. What this volatility means practically (expected price swings)
+3. Who should invest (conservative/moderate/aggressive)
+
+Be clear and use the exact numbers."""
 
         elif style == "detailed":
-            garch = d.get("forecasted_volatility_garch", "N/A")
-            xgb = d.get("forecasted_volatility_xgboost", "N/A")
-            lstm = d.get("forecasted_volatility_lstm", "N/A")
+            forecast_info = ""
+            if garch and xgb and lstm:
+                avg_forecast = (garch + xgb + lstm) / 3
+                forecast_info = f"""
+• GARCH Forecast: {garch:.4f} ({garch*100:.2f}%)
+• XGBoost Forecast: {xgb:.4f} ({xgb*100:.2f}%)
+• LSTM Forecast: {lstm:.4f} ({lstm*100:.2f}%)
+• Average Forecast: {avg_forecast:.4f} ({avg_forecast*100:.2f}%)
+"""
 
-            return f"""Detailed risk analysis:
-{ticker}
-Current: Vol={vol:.4f}, VaR={var:.4f}, CVaR={cvar:.4f}
-Forecast: GARCH={garch}, XGBoost={xgb}, LSTM={lstm}
+            return f"""Provide a balanced risk analysis for {ticker} suitable for both retail and institutional investors.
 
-Write paragraph on: risk level, future outlook, investment advice."""
+CURRENT METRICS:
+• Historical Volatility: {vol:.4f} ({vol*100:.2f}%)
+• Value at Risk (VaR₉₅): {var:.4f} ({var*100:.2f}%)
+• Conditional VaR (CVaR₉₅): {cvar:.4f} ({cvar*100:.2f}%)
+
+VOLATILITY FORECASTS (if available):
+{forecast_info}
+
+Write 3-4 concise paragraphs covering:
+
+1. RISK CLASSIFICATION: State the risk level (LOW/LOW-MODERATE/MODERATE/MODERATE-HIGH/HIGH/EXTREME) and explain what {vol*100:.2f}% volatility means in plain English (typical daily price swings, comparison to market average).
+
+2. LOSS POTENTIAL: Explain VaR and CVaR in practical terms - on a $10,000 investment, what losses are possible? Use the actual {var*100:.2f}% and {cvar*100:.2f}% numbers.
+
+3. FUTURE OUTLOOK: If forecasts are available, briefly compare them to current volatility. Is risk increasing, decreasing, or stable? What does this mean for investors?
+
+4. RECOMMENDATION: Who should invest (conservative/moderate/aggressive)? What position size is appropriate? Any specific risk management tips (stop losses, position limits).
+
+Be clear, precise, and actionable. Use all the numbers provided. Write in accessible language that both beginners and professionals can understand."""
 
         else:  # technical
-            return f"""Technical analysis for {ticker}:
-σ={vol:.4f}, VaR₉₅={var:.4f}, CVaR₉₅={cvar:.4f}
-Interpret these risk metrics."""
+            return f"""Provide technical risk analysis for {ticker}.
+
+Metrics:
+σ = {vol:.4f}, VaR₉₅ = {var:.4f}, CVaR₉₅ = {cvar:.4f}
+
+Analyze: volatility regime, tail risk (CVaR/VaR ratio), distribution properties, and risk-adjusted implications. Use quantitative terminology but keep it concise (2-3 paragraphs)."""
 
     # Portfolio
     else:
-        tickers = ", ".join(portfolio["tickers"])
-        avg_vol = portfolio["average_volatility"]
-        avg_var = portfolio["average_VaR_95"]
-        avg_cvar = portfolio["average_CVaR_95"]
-        n = len(portfolio["tickers"])
+        tickers = portfolio.get("tickers", [])
+        ticker_str = ", ".join(tickers[:5])
+        if len(tickers) > 5:
+            ticker_str += f"... (+{len(tickers)-5} more)"
+
+        avg_vol = portfolio.get("average_volatility", 0)
+        avg_var = portfolio.get("average_VaR_95", 0)
+        avg_cvar = portfolio.get("average_CVaR_95", 0)
+        n = len(tickers)
+
+        # Calculate statistics
+        valid_details = [d for d in details if "error" not in d]
+
+        if valid_details:
+            vol_list = [d["historical_volatility"] for d in valid_details]
+            vol_min = min(vol_list)
+            vol_max = max(vol_list)
+            vol_std = (sum((v - avg_vol) ** 2 for v in vol_list) / len(vol_list)) ** 0.5
+
+            # Find top risky stocks
+            sorted_stocks = sorted(
+                valid_details, key=lambda x: x["historical_volatility"], reverse=True
+            )
+            top_3_risky = [
+                (d["ticker"], d["historical_volatility"]) for d in sorted_stocks[:3]
+            ]
 
         if style == "concise":
-            return f"""Summarize portfolio risk in 2-3 sentences:
-{n} stocks: {tickers}
-Avg Vol={avg_vol:.4f}, VaR={avg_var:.4f}, CVaR={avg_cvar:.4f}"""
+            return f"""Summarize this portfolio's risk in 3-4 sentences.
+
+Portfolio: {n} stocks - {ticker_str}
+• Average Volatility: {avg_vol:.4f} ({avg_vol*100:.2f}%)
+• Average VaR (95%): {avg_var:.4f} ({avg_var*100:.2f}%)
+• Average CVaR (95%): {avg_cvar:.4f} ({avg_cvar*100:.2f}%)
+• Volatility Range: {vol_min:.4f} to {vol_max:.4f}
+
+Provide:
+1. Overall risk level with the specific volatility number
+2. Diversification quality assessment
+3. Any concentration concerns
+4. Clear recommendation for investor type"""
 
         elif style == "detailed":
-            return f"""Portfolio analysis:
-{n} stocks: {tickers}
-Average Vol={avg_vol:.4f}, VaR={avg_var:.4f}, CVaR={avg_cvar:.4f}
+            risky_stocks_str = ", ".join(
+                [f"{t} ({v*100:.1f}%)" for t, v in top_3_risky]
+            )
 
-Assess: overall risk, diversification benefit, recommendation."""
+            return f"""Provide a balanced portfolio risk analysis for both retail and institutional investors.
 
-        else:
-            return f"""Technical portfolio metrics:
-N={n}, σ̄={avg_vol:.4f}, VaR₉₅={avg_var:.4f}, CVaR₉₅={avg_cvar:.4f}"""
+PORTFOLIO: {n} Securities
+Holdings: {ticker_str}
+
+AGGREGATE METRICS:
+• Average Volatility: {avg_vol:.4f} ({avg_vol*100:.2f}%)
+• Average VaR (95%): {avg_var:.4f} ({avg_var*100:.2f}%)
+• Average CVaR (95%): {avg_cvar:.4f} ({avg_cvar*100:.2f}%)
+• Volatility Range: {vol_min:.4f} ({vol_min*100:.2f}%) to {vol_max:.4f} ({vol_max*100:.2f}%)
+• Std Deviation: {vol_std:.4f}
+
+TOP 3 RISKIEST: {risky_stocks_str}
+
+Write 3-4 concise paragraphs covering:
+
+1. OVERALL RISK: Classify portfolio risk level using the {avg_vol*100:.2f}% average volatility. Compare to market benchmarks (S&P 500 ~15-18%). What type of investor is this for?
+
+2. DIVERSIFICATION: Evaluate the volatility range ({vol_min*100:.2f}% to {vol_max*100:.2f}%). Is this well-diversified or concentrated? Does the {(vol_max-vol_min)*100:.2f} percentage point spread indicate good risk distribution?
+
+3. KEY RISKS: Discuss the riskiest holdings. What % of portfolio do they represent? Are there concentration concerns? On a $100,000 portfolio, what are realistic loss scenarios using VaR and CVaR?
+
+4. RECOMMENDATIONS: Should any positions be reduced? How should investors monitor this? Rebalancing suggestions? Suitable allocation % of total net worth?
+
+Be clear, precise, and actionable. Use all numbers provided. Accessible for both beginners and professionals."""
+
+        else:  # technical
+            return f"""Technical portfolio analysis.
+
+N={n}, σ̄={avg_vol:.4f}, VaR₉₅={avg_var:.4f}, CVaR₉₅={avg_cvar:.4f}
+Range=[{vol_min:.4f}, {vol_max:.4f}], σ(σ)={vol_std:.4f}
+
+Analyze: portfolio risk regime, dispersion characteristics, diversification quality, tail risk, and optimization implications. Keep concise (2-3 paragraphs)."""
 
 
-def _call_llm(prompt: str, token: str, max_retries: int = 3) -> str:
-    """Call Hugging Face API."""
+def _call_perplexity(prompt: str, token: str, max_retries: int = 3) -> str:
+    """Call Perplexity API with proper error handling."""
 
-    # Using Flan-T5-base (best free option)
-    url = "https://api-inference.huggingface.co/models/google/flan-t5-base"
+    url = "https://api.perplexity.ai/chat/completions"
 
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
 
     payload = {
-        "inputs": prompt,
-        "parameters": {
-            "max_new_tokens": 200,
-            "temperature": 0.7,
-            "top_p": 0.9,
-            "do_sample": True,
-        },
+        "model": "sonar",
+        "messages": [
+            {
+                "role": "system",
+                "content": """You are a professional financial analyst who explains risk clearly to both retail investors and institutions.
+
+Your style:
+- Clear, precise language - no jargon unless necessary
+- Always use specific numbers from the data
+- Practical explanations (e.g., "on a $10,000 investment...")
+- Actionable recommendations
+- Balanced tone - honest about risks without being alarmist
+
+Keep analysis concise but comprehensive - quality over quantity.""",
+            },
+            {"role": "user", "content": prompt},
+        ],
+        "temperature": 0.2,
+        "top_p": 0.9,
+        "max_tokens": 800,  # Reasonable length
     }
 
     for attempt in range(max_retries):
@@ -124,34 +232,58 @@ def _call_llm(prompt: str, token: str, max_retries: int = 3) -> str:
 
             if response.status_code == 200:
                 result = response.json()
-                if isinstance(result, list) and len(result) > 0:
-                    return result[0].get("generated_text", "").strip()
-                elif isinstance(result, dict):
-                    return result.get("generated_text", "").strip()
+                if "choices" in result and len(result["choices"]) > 0:
+                    content = result["choices"][0]["message"]["content"].strip()
+                    return content
+                else:
+                    raise Exception("Unexpected API response format")
 
-            elif response.status_code == 503:
-                # Model loading, wait and retry
-                print(f"Model loading... retry {attempt + 1}/{max_retries}")
+            elif response.status_code == 401:
+                raise Exception("Invalid Perplexity API key")
+
+            elif response.status_code == 429:
+                print(f"Rate limit hit, retry {attempt + 1}/{max_retries}")
                 import time
 
-                time.sleep(10)
+                time.sleep(5 * (attempt + 1))
                 continue
 
             else:
                 print(f"API error: {response.status_code}")
+                if attempt < max_retries - 1:
+                    import time
 
-        except Exception as e:
-            print(f"Request failed: {e}")
+                    time.sleep(3)
+                    continue
+                else:
+                    raise Exception(f"API failed with status {response.status_code}")
+
+        except requests.exceptions.Timeout:
+            print(f"Timeout, retry {attempt + 1}/{max_retries}")
             if attempt < max_retries - 1:
                 import time
 
-                time.sleep(5)
+                time.sleep(3)
+                continue
+            else:
+                raise Exception("Request timed out")
 
-    raise Exception("LLM API failed after retries")
+        except Exception as e:
+            if "Invalid" in str(e) or "key" in str(e).lower():
+                raise
+            if attempt < max_retries - 1:
+                import time
+
+                time.sleep(3)
+                continue
+            else:
+                raise
+
+    raise Exception("Perplexity API failed after retries")
 
 
 def _fallback_summary(metrics_data: Dict) -> str:
-    """Rule-based summary if LLM fails."""
+    """Clean, concise rule-based summary."""
 
     details = metrics_data.get("details", [])
     portfolio = metrics_data.get("portfolio_summary", {})
@@ -164,83 +296,162 @@ def _fallback_summary(metrics_data: Dict) -> str:
         var = abs(d["VaR_95"])
         cvar = abs(d["CVaR_95"])
 
-        # Assess risk
+        # Risk classification
         if vol > 0.5:
+            risk = "EXTREME RISK"
+            investor = "Only for aggressive traders with very high risk tolerance"
+            allocation = "Max 2-3% of portfolio"
+        elif vol > 0.4:
             risk = "HIGH RISK"
-            desc = "very high volatility"
-        elif vol > 0.35:
+            investor = "Aggressive investors only"
+            allocation = "Limit to 5-8% of portfolio"
+        elif vol > 0.3:
             risk = "MODERATE-HIGH RISK"
-            desc = "elevated volatility"
+            investor = "Moderate to aggressive investors"
+            allocation = "10-15% allocation recommended"
         elif vol > 0.25:
             risk = "MODERATE RISK"
-            desc = "moderate volatility"
-        else:
+            investor = "Balanced portfolios"
+            allocation = "15-20% allocation"
+        elif vol > 0.15:
             risk = "LOW-MODERATE RISK"
-            desc = "relatively stable"
-
-        summary = f"📊 {ticker} Risk Analysis\n\n"
-        summary += f"Risk Level: {risk}\n"
-        summary += f"Historical Volatility: {vol:.2%}\n"
-        summary += f"Value at Risk (95%): {var:.2%}\n"
-        summary += f"Conditional VaR: {cvar:.2%}\n\n"
-        summary += f"{ticker} exhibits {desc} with annualized volatility of {vol:.2%}. "
-        summary += f"At 95% confidence, potential maximum loss (VaR) is {var:.2%}. "
-
-        if vol > 0.4:
-            summary += "This is a high-risk investment suitable only for aggressive portfolios with high risk tolerance."
-        elif vol > 0.25:
-            summary += "Suitable for balanced portfolios with moderate risk tolerance."
+            investor = "Most investors"
+            allocation = "Can be a core holding (20-30%)"
         else:
-            summary += "Suitable for conservative portfolios seeking stability."
+            risk = "LOW RISK"
+            investor = "Conservative investors"
+            allocation = "Suitable as core holding (30-40%)"
+
+        # Calculate practical loss example
+        var_on_10k = var * 10000
+        cvar_on_10k = cvar * 10000
+
+        summary = f"""📊 {ticker} - Risk Analysis
+
+🎯 RISK LEVEL: {risk}
+Historical Volatility: {vol:.2%} (annualized)
+
+📉 LOSS POTENTIAL:
+• Value at Risk (95% confidence): {var:.2%}
+  → On $10,000 investment: ${abs(var_on_10k):,.0f} maximum loss expected
+• Conditional VaR (worst 5% scenarios): {cvar:.2%}
+  → Average loss in bad scenarios: ${abs(cvar_on_10k):,.0f}
+
+🎓 WHAT THIS MEANS:
+{ticker}'s {vol:.2%} volatility means typical daily swings of ±{(vol/16):.1%}. At 95% confidence, daily losses shouldn't exceed {var:.2%}. However, in the worst 5% of days, average loss is {cvar:.2%}.
+
+💡 RECOMMENDATION:
+• Investor Type: {investor}
+• Position Size: {allocation}
+• Risk Management: Use stop losses at {var*1.5:.1%}, monitor regularly
+"""
+
+        # Add forecast info if available
+        garch = d.get("forecasted_volatility_garch")
+        xgb = d.get("forecasted_volatility_xgboost")
+        lstm = d.get("forecasted_volatility_lstm")
+
+        if garch and xgb and lstm:
+            avg_forecast = (garch + xgb + lstm) / 3
+            change = (avg_forecast / vol - 1) * 100
+            trend = (
+                "increasing"
+                if change > 5
+                else "decreasing" if change < -5 else "stable"
+            )
+
+            summary += f"""
+🔮 OUTLOOK:
+Forecasted volatility: {avg_forecast:.2%} ({trend}, {change:+.1f}% change)
+Models suggest risk is {trend} in the near term.
+"""
 
         return summary
 
     # Portfolio
     else:
-        n = len(details)
-        tickers = ", ".join(portfolio["tickers"][:5])  # First 5
+        valid_details = [d for d in details if "error" not in d]
+        n = len(valid_details)
+
+        tickers_list = [d["ticker"] for d in valid_details]
+        tickers_display = ", ".join(tickers_list[:5])
         if n > 5:
-            tickers += f"... (+{n-5} more)"
+            tickers_display += f" (+{n-5} more)"
 
-        avg_vol = portfolio["average_volatility"]
-        avg_var = abs(portfolio["average_VaR_95"])
-        avg_cvar = abs(portfolio["average_CVaR_95"])
+        avg_vol = portfolio.get("average_volatility", 0)
+        avg_var = abs(portfolio.get("average_VaR_95", 0))
+        avg_cvar = abs(portfolio.get("average_CVaR_95", 0))
 
-        # Portfolio risk level
+        # Calculate dispersion
+        vol_list = [d["historical_volatility"] for d in valid_details]
+        vol_min = min(vol_list) if vol_list else 0
+        vol_max = max(vol_list) if vol_list else 0
+        vol_range = vol_max - vol_min
+
+        # Risk classification
         if avg_vol > 0.4:
             risk = "HIGH RISK"
+            investor = "Aggressive growth investors"
         elif avg_vol > 0.3:
             risk = "MODERATE-HIGH RISK"
-        elif avg_vol > 0.2:
+            investor = "Growth-oriented investors"
+        elif avg_vol > 0.25:
             risk = "MODERATE RISK"
+            investor = "Balanced investors"
+        elif avg_vol > 0.2:
+            risk = "LOW-MODERATE RISK"
+            investor = "Conservative to moderate investors"
         else:
             risk = "LOW RISK"
+            investor = "Conservative investors"
 
-        # Find outliers
-        high_risk = [d for d in details if d["historical_volatility"] > avg_vol * 1.3]
-        low_risk = [d for d in details if d["historical_volatility"] < avg_vol * 0.7]
+        # Diversification quality
+        if vol_range < 0.15:
+            div_quality = "Well-diversified"
+        elif vol_range < 0.25:
+            div_quality = "Moderately diversified"
+        else:
+            div_quality = "Concentrated risk profile"
 
-        summary = f"📊 Portfolio Risk Analysis ({n} stocks)\n\n"
-        summary += f"Overall Risk: {risk}\n"
-        summary += f"Average Volatility: {avg_vol:.2%}\n"
-        summary += f"Average VaR (95%): {avg_var:.2%}\n"
-        summary += f"Average CVaR: {avg_cvar:.2%}\n\n"
-        summary += f"Portfolio includes: {tickers}\n\n"
-        summary += f"The portfolio shows average volatility of {avg_vol:.2%} across {n} stocks. "
-
-        if len(high_risk) > 0:
-            summary += f"{len(high_risk)} high-volatility stocks detected. "
-
-        summary += (
-            f"Diversification across {n} assets helps reduce overall portfolio risk. "
+        # Find top risky stocks
+        sorted_stocks = sorted(
+            valid_details, key=lambda x: x["historical_volatility"], reverse=True
+        )
+        top_risky = ", ".join(
+            [
+                f"{d['ticker']} ({d['historical_volatility']:.1%})"
+                for d in sorted_stocks[:3]
+            ]
         )
 
-        if avg_vol > 0.35:
-            summary += "This is an aggressive portfolio requiring close monitoring."
-        elif avg_vol > 0.25:
-            summary += "Suitable for moderate risk tolerance with regular rebalancing."
-        else:
-            summary += "Well-balanced portfolio for conservative to moderate investors."
+        # Practical loss examples
+        var_on_100k = avg_var * 100000
+        cvar_on_100k = avg_cvar * 100000
+
+        summary = f"""📊 Portfolio Risk Analysis - {n} Securities
+
+Holdings: {tickers_display}
+
+🎯 OVERALL RISK: {risk}
+Average Volatility: {avg_vol:.2%}
+
+📉 LOSS POTENTIAL (on $100,000 portfolio):
+• Value at Risk (95%): ${var_on_100k:,.0f}
+• Conditional VaR (worst 5%): ${cvar_on_100k:,.0f}
+
+📊 DIVERSIFICATION: {div_quality}
+• Volatility Range: {vol_min:.1%} to {vol_max:.1%}
+• Spread: {vol_range:.1%} percentage points
+
+⚠️  HIGHEST RISK POSITIONS:
+{top_risky}
+
+💡 RECOMMENDATION:
+• Suitable For: {investor}
+• Diversification: {div_quality} - {"consider adding lower volatility assets" if vol_range > 0.25 else "good risk distribution"}
+• Monitoring: {"Daily during volatile periods" if avg_vol > 0.3 else "Weekly review recommended"}
+• Action: {"Consider reducing exposure to highest volatility stocks" if avg_vol > 0.35 else "Maintain current allocation with quarterly rebalancing"}
+"""
 
         return summary
 
@@ -264,39 +475,3 @@ def get_risk_level(metrics_data: Dict) -> str:
         return "LOW-MODERATE"
     else:
         return "LOW"
-
-
-# Quick test
-if __name__ == "__main__":
-    # Test with example data
-    test_data = {
-        "portfolio_summary": {
-            "tickers": ["ADANIGREEN.NS"],
-            "average_volatility": 0.54359,
-            "average_VaR_95": -0.05777,
-            "average_CVaR_95": -0.09612,
-        },
-        "details": [
-            {
-                "ticker": "ADANIGREEN.NS",
-                "historical_volatility": 0.54359,
-                "VaR_95": -0.05777,
-                "CVaR_95": -0.09612,
-                "forecasted_volatility_garch": 0.0217,
-                "forecasted_volatility_xgboost": 0.0109,
-                "forecasted_volatility_lstm": 0.00182,
-            }
-        ],
-    }
-
-    print("Testing Summary Generator...")
-    print("=" * 60)
-
-    # Test fallback (no token)
-    summary = generate_ai_summary(test_data, style="concise")
-    print(summary)
-    print("\n" + "=" * 60)
-
-    # Test risk level
-    risk = get_risk_level(test_data)
-    print(f"Risk Level: {risk}")
