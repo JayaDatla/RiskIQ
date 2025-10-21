@@ -217,7 +217,8 @@ Your style:
 - Actionable recommendations
 - Balanced tone - honest about risks without being alarmist
 
-Keep analysis concise but comprehensive - quality over quantity.""",
+Keep analysis concise but comprehensive - quality over quantity.
+And keep it like a normal paragraph, no bullet points, no code style output.""",
             },
             {"role": "user", "content": prompt},
         ],
