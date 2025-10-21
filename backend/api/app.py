@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from typing import List
 from backend.api.risk_models import get_risk_metrics
-from risk_summary import generate_ai_summary, get_risk_level
+from backend.api.risk_summary import generate_ai_summary, get_risk_level
 
 app = FastAPI()
 
