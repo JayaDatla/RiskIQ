@@ -1,9 +1,23 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from typing import List
 from backend.api.risk_models import get_risk_metrics
 from backend.api.risk_summary import generate_ai_summary, get_risk_level
 
-app = FastAPI()
+app = FastAPI(
+    title="RiskIQ API",
+    description="Advanced Risk Analysis API with AI-powered volatility forecasting",
+    version="1.0.0",
+)
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins for HF Spaces
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/risk/{ticker}")
