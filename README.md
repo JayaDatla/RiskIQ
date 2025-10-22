@@ -90,6 +90,3 @@ The application is ready to use! Simply:
 
 Fully responsive design works on desktop, tablet, and mobile devices.
 
----
-
-**Built with ❤️ for quantitative finance and risk management**
