@@ -7,9 +7,9 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: radial-gradient(1200px 600px at 20% 0%, #0f172a 0%, #0b1320 40%, #0a0f1a 100%);
     min-height: 100vh;
-    color: #333;
+    color: #e5e7eb;
     line-height: 1.6;
 }
 
@@ -23,7 +23,7 @@ body {
 .header {
     text-align: center;
     margin-bottom: 30px;
-    color: white;
+    color: #e5e7eb;
 }
 
 .logo {
@@ -36,7 +36,8 @@ body {
 
 .logo i {
     font-size: 2.5rem;
-    color: #ffd700;
+    color: #22c55e;
+    /* emerald */
 }
 
 .logo h1 {
@@ -60,9 +61,10 @@ body {
 }
 
 .tab-btn {
-    background: rgba(255, 255, 255, 0.2);
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    color: white;
+    background: rgba(124, 58, 237, 0.15);
+    /* purple overlay */
+    border: 2px solid rgba(124, 58, 237, 0.25);
+    color: #e5e7eb;
     padding: 15px 30px;
     border-radius: 50px;
     cursor: pointer;
@@ -82,8 +84,8 @@ body {
 }
 
 .tab-btn.active {
-    background: white;
-    color: #667eea;
+    background: #111827;
+    color: #22c55e;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
@@ -98,11 +100,11 @@ body {
 
 /* Analysis Section */
 .analysis-section {
-    background: white;
+    background: rgba(17, 24, 39, 0.85);
     border-radius: 20px;
     padding: 30px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(124, 58, 237, 0.25);
 }
 
 .input-section {
@@ -110,7 +112,7 @@ body {
 }
 
 .input-section h2 {
-    color: #333;
+    color: #e5e7eb;
     margin-bottom: 20px;
     font-size: 1.8rem;
     font-weight: 600;
@@ -126,7 +128,7 @@ body {
 .input-group textarea {
     flex: 1;
     padding: 15px 20px;
-    border: 2px solid #e1e5e9;
+    border: 2px solid rgba(124, 58, 237, 0.25);
     border-radius: 10px;
     font-size: 1rem;
     transition: all 0.3s ease;
@@ -136,8 +138,8 @@ body {
 .input-group input:focus,
 .input-group textarea:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: #22c55e;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
 }
 
 .input-group textarea {
@@ -146,8 +148,8 @@ body {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: linear-gradient(135deg, #22c55e 0%, #7c3aed 100%);
+    color: #0b0f1a;
     border: none;
     padding: 15px 30px;
     border-radius: 10px;
@@ -174,7 +176,7 @@ body {
 .loading {
     text-align: center;
     padding: 20px;
-    color: #667eea;
+    color: #22c55e;
     font-size: 1.1rem;
     font-weight: 500;
 }
@@ -208,7 +210,7 @@ body {
 }
 
 .risk-level-section h3 {
-    color: #333;
+    color: #e5e7eb;
     margin-bottom: 15px;
     font-size: 1.5rem;
 }
@@ -258,14 +260,14 @@ body {
 }
 
 .metric-card {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    background: linear-gradient(135deg, rgba(31, 41, 55, 0.9) 0%, rgba(17, 24, 39, 0.9) 100%);
     border-radius: 15px;
     padding: 25px;
     display: flex;
     align-items: center;
     gap: 20px;
     transition: all 0.3s ease;
-    border: 1px solid #e1e5e9;
+    border: 1px solid rgba(124, 58, 237, 0.2);
 }
 
 .metric-card:hover {
@@ -277,7 +279,7 @@ body {
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #22c55e, #7c3aed);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -286,7 +288,7 @@ body {
 }
 
 .metric-content h4 {
-    color: #333;
+    color: #e5e7eb;
     margin-bottom: 8px;
     font-size: 1.1rem;
     font-weight: 600;
@@ -295,7 +297,7 @@ body {
 .metric-value {
     font-size: 1.8rem;
     font-weight: 700;
-    color: #667eea;
+    color: #22c55e;
     margin-bottom: 5px;
 }
 
@@ -322,22 +324,22 @@ body {
 }
 
 .forecast-card {
-    background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+    background: linear-gradient(135deg, rgba(31, 41, 55, 0.9) 0%, rgba(17, 24, 39, 0.9) 100%);
     border-radius: 15px;
     padding: 20px;
     text-align: center;
-    border: 2px solid #e1e5e9;
+    border: 2px solid rgba(124, 58, 237, 0.2);
     transition: all 0.3s ease;
 }
 
 .forecast-card:hover {
-    border-color: #667eea;
+    border-color: #22c55e;
     transform: translateY(-3px);
     box-shadow: 0 10px 25px rgba(102, 126, 234, 0.1);
 }
 
 .forecast-card h4 {
-    color: #333;
+    color: #e5e7eb;
     margin-bottom: 15px;
     font-size: 1rem;
     font-weight: 600;
@@ -346,19 +348,19 @@ body {
 .forecast-value {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #667eea;
+    color: #22c55e;
 }
 
 /* Chart Section */
 .chart-section {
     margin-bottom: 30px;
-    background: #f8f9fa;
+    background: rgba(17, 24, 39, 0.85);
     border-radius: 15px;
     padding: 25px;
 }
 
 .chart-section h3 {
-    color: #333;
+    color: #e5e7eb;
     margin-bottom: 20px;
     font-size: 1.5rem;
 }
@@ -370,20 +372,20 @@ body {
 
 /* Summary Section */
 .summary-section {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    background: linear-gradient(135deg, rgba(31, 41, 55, 0.9) 0%, rgba(17, 24, 39, 0.9) 100%);
     border-radius: 15px;
     padding: 25px;
-    border-left: 5px solid #667eea;
+    border-left: 5px solid #22c55e;
 }
 
 .summary-section h3 {
-    color: #333;
+    color: #e5e7eb;
     margin-bottom: 20px;
     font-size: 1.5rem;
 }
 
 .summary-content {
-    color: #555;
+    color: #d1d5db;
     line-height: 1.8;
     font-size: 1rem;
     white-space: pre-line;
@@ -392,13 +394,13 @@ body {
 /* Portfolio Specific Styles */
 .portfolio-summary {
     margin-bottom: 30px;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    background: linear-gradient(135deg, rgba(31, 41, 55, 0.9) 0%, rgba(17, 24, 39, 0.9) 100%);
     border-radius: 15px;
     padding: 25px;
 }
 
 .portfolio-summary h3 {
-    color: #333;
+    color: #e5e7eb;
     margin-bottom: 20px;
     font-size: 1.5rem;
 }
@@ -414,18 +416,18 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 15px;
-    background: white;
+    background: rgba(17, 24, 39, 0.85);
     border-radius: 10px;
-    border: 1px solid #e1e5e9;
+    border: 1px solid rgba(124, 58, 237, 0.2);
 }
 
 .stat-label {
-    color: #666;
+    color: #9ca3af;
     font-weight: 500;
 }
 
 .stat-value {
-    color: #667eea;
+    color: #22c55e;
     font-weight: 700;
     font-size: 1.1rem;
 }
@@ -448,10 +450,10 @@ body {
 }
 
 .stock-card {
-    background: white;
+    background: rgba(17, 24, 39, 0.85);
     border-radius: 15px;
     padding: 20px;
-    border: 1px solid #e1e5e9;
+    border: 1px solid rgba(124, 58, 237, 0.2);
     transition: all 0.3s ease;
 }
 
@@ -470,7 +472,7 @@ body {
 .stock-ticker {
     font-size: 1.3rem;
     font-weight: 700;
-    color: #333;
+    color: #e5e7eb;
 }
 
 .stock-risk {
@@ -490,20 +492,20 @@ body {
 .stock-metric {
     text-align: center;
     padding: 10px;
-    background: #f8f9fa;
+    background: rgba(31, 41, 55, 0.9);
     border-radius: 8px;
 }
 
 .stock-metric-label {
     font-size: 0.8rem;
-    color: #666;
+    color: #9ca3af;
     margin-bottom: 5px;
 }
 
 .stock-metric-value {
     font-size: 1.1rem;
     font-weight: 700;
-    color: #667eea;
+    color: #22c55e;
 }
 
 /* Modal */
@@ -592,6 +594,163 @@ body {
     .analysis-section {
         padding: 20px;
     }
+}
+
+/* ===== Theme Overrides: Light (White/Black/Orange/Blue) ===== */
+/* These override earlier dark theme choices to match the requested palette. */
+body {
+    background: #FFFFFF;
+    color: #000000;
+}
+
+.header {
+    color: #000000;
+}
+
+.logo i {
+    color: #FF9900;
+}
+
+.tab-btn {
+    background: #F2F2F2;
+    border: 2px solid #F2F2F2;
+    color: #333333;
+}
+
+.tab-btn.active {
+    background: #FF9900;
+    color: #000000;
+}
+
+.analysis-section {
+    background: #FFFFFF;
+    border: 1px solid #F2F2F2;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.06);
+}
+
+.input-section h2 {
+    color: #000000;
+}
+
+.input-group input,
+.input-group textarea {
+    border: 2px solid #F2F2F2;
+}
+
+.input-group input:focus,
+.input-group textarea:focus {
+    border-color: #0070F3;
+    box-shadow: 0 0 0 3px rgba(0, 112, 243, 0.12);
+}
+
+.btn-primary {
+    background: #FF9900;
+    color: #000000;
+}
+
+.loading {
+    color: #0070F3;
+}
+
+.risk-level-section h3 {
+    color: #000000;
+}
+
+.metric-card {
+    background: #FFFFFF;
+    border: 1px solid #F2F2F2;
+}
+
+.metric-icon {
+    background: linear-gradient(135deg, #FF9900, #0070F3);
+}
+
+.metric-content h4 {
+    color: #333333;
+}
+
+.metric-value {
+    color: #0070F3;
+}
+
+.forecast-card {
+    background: #FFFFFF;
+    border: 2px solid #F2F2F2;
+}
+
+.forecast-card:hover {
+    border-color: #0070F3;
+}
+
+.forecast-card h4 {
+    color: #333333;
+}
+
+.forecast-value {
+    color: #0070F3;
+}
+
+.chart-section {
+    background: #FFFFFF;
+}
+
+.chart-section h3 {
+    color: #000000;
+}
+
+.summary-section {
+    background: #FFFFFF;
+    border-left: 5px solid #FF9900;
+}
+
+.summary-section h3 {
+    color: #000000;
+}
+
+.summary-content {
+    color: #333333;
+}
+
+.portfolio-summary {
+    background: #FFFFFF;
+}
+
+.portfolio-summary h3 {
+    color: #000000;
+}
+
+.stat-item {
+    background: #FFFFFF;
+    border: 1px solid #F2F2F2;
+}
+
+.stat-label {
+    color: #333333;
+}
+
+.stat-value {
+    color: #0070F3;
+}
+
+.stock-card {
+    background: #FFFFFF;
+    border: 1px solid #F2F2F2;
+}
+
+.stock-ticker {
+    color: #000000;
+}
+
+.stock-metric {
+    background: #F2F2F2;
+}
+
+.stock-metric-label {
+    color: #333333;
+}
+
+.stock-metric-value {
+    color: #0070F3;
 }
 
 @media (max-width: 480px) {

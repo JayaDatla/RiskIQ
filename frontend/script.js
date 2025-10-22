@@ -155,8 +155,9 @@ function displaySingleStockResults(data) {
     elements.xgboostForecast.textContent = formatPercentage(data.details[0].forecasted_volatility_xgboost);
     elements.lstmForecast.textContent = formatPercentage(data.details[0].forecasted_volatility_lstm);
 
-    // Create price chart
-    createPriceChart(data.details[0].historical_data);
+    // Create price chart with currency
+    const currency = data.details[0].currency || 'USD';
+    createPriceChart(data.details[0].historical_data, currency);
 
     // Update AI summary
     elements.aiSummary.textContent = data.summary;
@@ -273,7 +274,7 @@ function displayIndividualStocks(stocks) {
 }
 
 // Chart Functions
-function createPriceChart(historicalData) {
+function createPriceChart(historicalData, currency) {
     if (priceChart) {
         priceChart.destroy();
     }
@@ -291,15 +292,15 @@ function createPriceChart(historicalData) {
             datasets: [{
                 label: 'Price',
                 data: prices,
-                borderColor: '#667eea',
-                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                borderColor: '#22c55e',
+                backgroundColor: 'rgba(34, 197, 94, 0.08)',
                 tension: 0.4,
                 yAxisID: 'y'
             }, {
                 label: 'Returns',
                 data: returns,
-                borderColor: '#ff6b6b',
-                backgroundColor: 'rgba(255, 107, 107, 0.1)',
+                borderColor: '#7c3aed',
+                backgroundColor: 'rgba(124, 58, 237, 0.08)',
                 tension: 0.4,
                 yAxisID: 'y1'
             }]
@@ -321,7 +322,13 @@ function createPriceChart(historicalData) {
                     position: 'left',
                     title: {
                         display: true,
-                        text: 'Price ($)'
+                        text: `Price (${currency})`
+                    },
+                    ticks: {
+                        color: '#9ca3af'
+                    },
+                    grid: {
+                        color: 'rgba(124,58,237,0.15)'
                     }
                 },
                 y1: {
@@ -334,13 +341,21 @@ function createPriceChart(historicalData) {
                     },
                     grid: {
                         drawOnChartArea: false,
+                        color: 'rgba(124,58,237,0.15)'
                     },
+                    suggestedMin: -0.08,
+                    suggestedMax: 0.08,
+                    ticks: {
+                        callback: function (value) { return (value * 100).toFixed(1) + '%'; },
+                        color: '#9ca3af'
+                    }
                 }
             },
             plugins: {
                 legend: {
                     display: true,
-                    position: 'top'
+                    position: 'top',
+                    labels: { color: '#d1d5db' }
                 }
             }
         }
@@ -356,7 +371,7 @@ function createPortfolioChart(stocks) {
 
     const labels = stocks.map(s => s.ticker);
     const volatilities = stocks.map(s => s.historical_volatility);
-    const colors = generateColors(stocks.length);
+    const colors = stocks.map(() => 'rgba(34,197,94,0.6)');
 
     portfolioChart = new Chart(ctx, {
         type: 'bar',
@@ -383,14 +398,18 @@ function createPortfolioChart(stocks) {
                     ticks: {
                         callback: function (value) {
                             return formatPercentage(value);
-                        }
-                    }
+                        },
+                        color: '#9ca3af'
+                    },
+                    grid: { color: 'rgba(124,58,237,0.15)' }
                 },
                 x: {
                     title: {
                         display: true,
                         text: 'Stock Ticker'
-                    }
+                    },
+                    ticks: { color: '#9ca3af' },
+                    grid: { color: 'rgba(124,58,237,0.15)' }
                 }
             },
             plugins: {
@@ -402,7 +421,12 @@ function createPortfolioChart(stocks) {
                         label: function (context) {
                             return `${context.dataset.label}: ${formatPercentage(context.parsed.y)}`;
                         }
-                    }
+                    },
+                    backgroundColor: 'rgba(17,24,39,0.95)',
+                    titleColor: '#e5e7eb',
+                    bodyColor: '#d1d5db',
+                    borderColor: 'rgba(124,58,237,0.3)',
+                    borderWidth: 1
                 }
             }
         }

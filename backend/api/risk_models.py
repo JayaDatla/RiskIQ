@@ -11,6 +11,7 @@ import torch.nn as nn
 import warnings
 import os
 from backend.api.fetch_data import prepare_data
+import yfinance as yf
 
 warnings.filterwarnings("ignore")
 
@@ -263,6 +264,16 @@ def get_risk_metrics(ticker, period="1y", interval="1d"):
     Fetch historical data, compute statistical risk metrics, and generate volatility forecasts.
     """
     hist = prepare_data(ticker, period, interval)
+    # Detect currency (best-effort)
+    try:
+        yf_t = yf.Ticker(ticker)
+        currency = getattr(getattr(yf_t, "fast_info", {}), "currency", None)
+        if not currency:
+            info = getattr(yf_t, "info", {}) or {}
+            currency = info.get("currency")
+        currency = currency or "USD"
+    except Exception:
+        currency = "USD"
     returns = hist["Return"].dropna()
 
     # --- Compute historical metrics ---
@@ -290,6 +301,7 @@ def get_risk_metrics(ticker, period="1y", interval="1d"):
         "forecasted_volatility_xgboost": float(xgb_vol),
         "forecasted_volatility_lstm": float(lstm_vol),
         "historical_data": hist_chart.to_dict(orient="records"),
+        "currency": currency,
     }
 
     return convert_numpy_types(result)
