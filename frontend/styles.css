@@ -368,6 +368,7 @@ body {
 .chart-section canvas {
     max-width: 100%;
     height: auto;
+    /* keep responsive */
 }
 
 /* Summary Section */

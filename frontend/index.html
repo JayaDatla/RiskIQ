@@ -208,6 +208,54 @@
                 <p id="error-message"></p>
             </div>
         </div>
+
+        <!-- Education: Understanding the Metrics -->
+        <section class="analysis-section" style="margin-top: 24px;">
+            <h2>Understanding the Metrics</h2>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-icon"><i class="fas fa-wave-square"></i></div>
+                    <div class="metric-content">
+                        <h4>Volatility</h4>
+                        <p class="metric-desc">How much a stock typically swings. Higher volatility means larger
+                            day‑to‑day price moves. If volatility is 25% (annualised), daily swings are roughly ±1.5% on
+                            average.</p>
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon"><i class="fas fa-arrow-down"></i></div>
+                    <div class="metric-content">
+                        <h4>VaR (95%)</h4>
+                        <p class="metric-desc">Value at Risk estimates a typical worst‑case one‑day loss with 95%
+                            confidence. If VaR is 2%, there’s a 1 in 20 chance losses exceed 2% on a given day.</p>
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon"><i class="fas fa-fire"></i></div>
+                    <div class="metric-content">
+                        <h4>CVaR (95%)</h4>
+                        <p class="metric-desc">Conditional VaR (Expected Shortfall) is the average loss on the worst 5%
+                            of days. If CVaR is 3%, those bad days average ~3% loss.</p>
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon"><i class="fas fa-robot"></i></div>
+                    <div class="metric-content">
+                        <h4>Forecasted Volatility</h4>
+                        <p class="metric-desc">Model predictions (GARCH, XGBoost, LSTM) of near‑term risk. Compare to
+                            current volatility to see if risk is increasing, decreasing, or stable.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="summary-section" style="margin-top:16px;">
+                <h3>How to Use This</h3>
+                <div class="summary-content">
+                    Use position sizes that align with your risk comfort. Example: with a $10,000 position and VaR=2%, a
+                    typical worst‑case day is ~$200. If that exceeds your comfort, size down or use risk controls
+                    (stops, gradual entries).
+                </div>
+            </div>
+        </section>
     </div>
 
     <script src="/static/script.js"></script>

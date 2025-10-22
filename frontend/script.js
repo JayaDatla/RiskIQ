@@ -307,7 +307,8 @@ function createPriceChart(historicalData, currency) {
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false,
+            maintainAspectRatio: true,
+            aspectRatio: 2, // wider than tall to avoid vertical stretch
             scales: {
                 x: {
                     display: true,
@@ -387,7 +388,8 @@ function createPortfolioChart(stocks) {
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false,
+            maintainAspectRatio: true,
+            aspectRatio: 2,
             scales: {
                 y: {
                     beginAtZero: true,
