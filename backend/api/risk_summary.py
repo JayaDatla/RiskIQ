@@ -56,61 +56,99 @@ def _create_prompt(metrics_data: Dict, style: str) -> str:
         xgb = d.get("forecasted_volatility_xgboost")
         lstm = d.get("forecasted_volatility_lstm")
 
+        # Calculate average forecast and trend
+        forecast_info = ""
+        trend_analysis = ""
+        if garch and xgb and lstm:
+            avg_forecast = (garch + xgb + lstm) / 3
+            change_pct = ((avg_forecast / vol) - 1) * 100
+            trend = (
+                "increasing"
+                if change_pct > 5
+                else "decreasing" if change_pct < -5 else "stable"
+            )
+
+            forecast_info = f"""
+VOLATILITY FORECASTS:
+• GARCH Model: {garch:.4f} ({garch*100:.2f}%)
+• XGBoost Model: {xgb:.4f} ({xgb*100:.2f}%)
+• LSTM Model: {lstm:.4f} ({lstm*100:.2f}%)
+• Average Forecast: {avg_forecast:.4f} ({avg_forecast*100:.2f}%)
+• Trend: {trend.upper()} ({change_pct:+.1f}% vs current)
+"""
+            trend_analysis = f"The forecasted volatility is {trend} with an average prediction of {avg_forecast*100:.2f}%, representing a {change_pct:+.1f}% change from current levels."
+        else:
+            forecast_info = "\nVOLATILITY FORECASTS: Not available for this analysis."
+            trend_analysis = "Forecasting data is not available, so focus on historical patterns and current metrics."
+
         if style == "concise":
-            return f"""Analyze this stock's risk in 3 clear sentences for both retail and professional investors.
+            return f"""Analyze this stock's risk comprehensively in 4-5 clear sentences for both retail and professional investors.
 
 Stock: {ticker}
-• Volatility: {vol:.4f} ({vol*100:.2f}%)
+
+HISTORICAL METRICS:
+• Current Volatility: {vol:.4f} ({vol*100:.2f}%)
 • VaR (95%): {var:.4f} ({var*100:.2f}%)
 • CVaR (95%): {cvar:.4f} ({cvar*100:.2f}%)
-
-Provide:
-1. Risk level classification (LOW/MODERATE/HIGH/EXTREME)
-2. What this volatility means practically (expected price swings)
-3. Who should invest (conservative/moderate/aggressive)
-
-Be clear and use the exact numbers."""
-
-        elif style == "detailed":
-            forecast_info = ""
-            if garch and xgb and lstm:
-                avg_forecast = (garch + xgb + lstm) / 3
-                forecast_info = f"""
-• GARCH Forecast: {garch:.4f} ({garch*100:.2f}%)
-• XGBoost Forecast: {xgb:.4f} ({xgb*100:.2f}%)
-• LSTM Forecast: {lstm:.4f} ({lstm*100:.2f}%)
-• Average Forecast: {avg_forecast:.4f} ({avg_forecast*100:.2f}%)
-"""
-
-            return f"""Provide a balanced risk analysis for {ticker} suitable for both retail and institutional investors.
-
-CURRENT METRICS:
-• Historical Volatility: {vol:.4f} ({vol*100:.2f}%)
-• Value at Risk (VaR₉₅): {var:.4f} ({var*100:.2f}%)
-• Conditional VaR (CVaR₉₅): {cvar:.4f} ({cvar*100:.2f}%)
-
-VOLATILITY FORECASTS (if available):
 {forecast_info}
 
-Write 3-4 concise paragraphs covering:
+Provide:
+1. Risk level classification (LOW/MODERATE/HIGH/EXTREME) based on {vol*100:.2f}% volatility
+2. Historical context: What this volatility means practically (expected price swings, comparison to market average ~15-18%)
+3. Forecast outlook: {trend_analysis}
+4. Investment recommendation: Who should invest (conservative/moderate/aggressive) and appropriate position sizing
 
-1. RISK CLASSIFICATION: State the risk level (LOW/LOW-MODERATE/MODERATE/MODERATE-HIGH/HIGH/EXTREME) and explain what {vol*100:.2f}% volatility means in plain English (typical daily price swings, comparison to market average).
+Be clear, use all the exact numbers provided, and connect historical performance with future expectations."""
 
-2. LOSS POTENTIAL: Explain VaR and CVaR in practical terms - on a $10,000 investment, what losses are possible? Use the actual {var*100:.2f}% and {cvar*100:.2f}% numbers.
+        elif style == "detailed":
+            return f"""Provide a comprehensive risk analysis for {ticker} suitable for both retail and institutional investors, integrating both historical performance and forward-looking forecasts.
 
-3. FUTURE OUTLOOK: If forecasts are available, briefly compare them to current volatility. Is risk increasing, decreasing, or stable? What does this mean for investors?
+HISTORICAL METRICS:
+• Historical Volatility: {vol:.4f} ({vol*100:.2f}% annualized)
+• Value at Risk (VaR₉₅): {var:.4f} ({var*100:.2f}%)
+• Conditional VaR (CVaR₉₅): {cvar:.4f} ({cvar*100:.2f}%)
+{forecast_info}
 
-4. RECOMMENDATION: Who should invest (conservative/moderate/aggressive)? What position size is appropriate? Any specific risk management tips (stop losses, position limits).
+Write 4-5 detailed paragraphs covering:
 
-Be clear, precise, and actionable. Use all the numbers provided. Write in accessible language that both beginners and professionals can understand."""
+1. RISK CLASSIFICATION & HISTORICAL CONTEXT: 
+   State the risk level (LOW/LOW-MODERATE/MODERATE/MODERATE-HIGH/HIGH/EXTREME) based on the {vol*100:.2f}% historical volatility. Explain what this volatility means in plain English - typical daily price swings (use {(vol/16)*100:.2f}% as daily estimate), how it compares to market average (S&P 500 ~15-18%), and what investors have experienced historically with this stock.
+
+2. LOSS POTENTIAL & PRACTICAL IMPLICATIONS: 
+   Explain VaR and CVaR in practical terms. On a $10,000 investment, what losses are possible? Use the actual {var*100:.2f}% VaR (meaning 95% of the time losses won't exceed this) and {cvar*100:.2f}% CVaR (average loss in the worst 5% of cases). Calculate and state dollar amounts explicitly.
+
+3. FORWARD-LOOKING FORECAST ANALYSIS: 
+   {trend_analysis} Discuss each forecasting model's prediction (GARCH: {garch*100:.2f if garch else 'N/A'}%, XGBoost: {xgb*100:.2f if xgb else 'N/A'}%, LSTM: {lstm*100:.2f if lstm else 'N/A'}%). Explain what the consensus forecast means - is risk accelerating, moderating, or holding steady? How should investors adjust their expectations based on this outlook?
+
+4. INTEGRATED RISK ASSESSMENT: 
+   Synthesize historical and forecast data. If forecasts show increasing volatility, what does this mean on top of already {vol*100:.2f}% volatility? If decreasing, is this a good entry point? Discuss the reliability of forecasts given the historical pattern.
+
+5. ACTIONABLE RECOMMENDATIONS: 
+   Who should invest (conservative/moderate/aggressive)? What position size is appropriate (give specific % of portfolio)? Risk management tips: suggest stop-loss levels (e.g., {var*1.5*100:.1f}%), position limits, and monitoring frequency. Should investors wait for forecast trends to materialize or act now?
+
+Be thorough, precise, and actionable. Use ALL numbers provided. Connect historical reality with forecasted expectations. Write in accessible language that both beginners and professionals can understand."""
 
         else:  # technical
-            return f"""Provide technical risk analysis for {ticker}.
+            forecast_metrics = ""
+            if garch and xgb and lstm:
+                avg_forecast = (garch + xgb + lstm) / 3
+                forecast_metrics = (
+                    f", σ̂ = {avg_forecast:.4f}, Δσ = {((avg_forecast/vol)-1)*100:+.1f}%"
+                )
 
-Metrics:
-σ = {vol:.4f}, VaR₉₅ = {var:.4f}, CVaR₉₅ = {cvar:.4f}
+            return f"""Provide comprehensive technical risk analysis for {ticker} incorporating both realized and forecasted volatility.
 
-Analyze: volatility regime, tail risk (CVaR/VaR ratio), distribution properties, and risk-adjusted implications. Use quantitative terminology but keep it concise (2-3 paragraphs)."""
+METRICS:
+Historical: σ = {vol:.4f}, VaR₉₅ = {var:.4f}, CVaR₉₅ = {cvar:.4f}
+Forecasts: GARCH = {garch:.4f if garch else 'N/A'}, XGBoost = {xgb:.4f if xgb else 'N/A'}, LSTM = {lstm:.4f if lstm else 'N/A'}{forecast_metrics}
+
+Analyze in 3-4 paragraphs:
+1. Volatility regime classification and historical distribution properties (examine CVaR/VaR ratio for tail thickness)
+2. Model-based forecast analysis: consensus view, model divergence, and volatility term structure implications
+3. Forward risk-adjusted metrics: how forecasted volatility impacts Sharpe ratios, position sizing under Kelly criterion, and optimal leverage
+4. Quantitative recommendations: VaR-based position limits, volatility targeting strategies, and hedge ratios
+
+Use quantitative terminology and cite all metrics."""
 
     # Portfolio
     else:
@@ -141,59 +179,137 @@ Analyze: volatility regime, tail risk (CVaR/VaR ratio), distribution properties,
                 (d["ticker"], d["historical_volatility"]) for d in sorted_stocks[:3]
             ]
 
+            # Gather forecast data for portfolio
+            forecast_data = []
+            for d in valid_details:
+                garch = d.get("forecasted_volatility_garch")
+                xgb = d.get("forecasted_volatility_xgboost")
+                lstm = d.get("forecasted_volatility_lstm")
+                if garch and xgb and lstm:
+                    avg_forecast = (garch + xgb + lstm) / 3
+                    forecast_data.append(
+                        {
+                            "ticker": d["ticker"],
+                            "current": d["historical_volatility"],
+                            "forecast": avg_forecast,
+                            "change": ((avg_forecast / d["historical_volatility"]) - 1)
+                            * 100,
+                        }
+                    )
+
+            forecast_summary = ""
+            if forecast_data:
+                avg_forecast_vol = sum(f["forecast"] for f in forecast_data) / len(
+                    forecast_data
+                )
+                avg_change = sum(f["change"] for f in forecast_data) / len(
+                    forecast_data
+                )
+                increasing = sum(1 for f in forecast_data if f["change"] > 5)
+                decreasing = sum(1 for f in forecast_data if f["change"] < -5)
+                stable = len(forecast_data) - increasing - decreasing
+
+                forecast_summary = f"""
+PORTFOLIO FORECAST SUMMARY:
+• Securities with Forecasts: {len(forecast_data)} of {n}
+• Average Forecasted Volatility: {avg_forecast_vol:.4f} ({avg_forecast_vol*100:.2f}%)
+• Average Change: {avg_change:+.1f}%
+• Trend Distribution: {increasing} increasing, {decreasing} decreasing, {stable} stable
+• Top Volatile Forecasts: {", ".join([f"{f['ticker']} ({f['forecast']*100:.1f}%)" for f in sorted(forecast_data, key=lambda x: x['forecast'], reverse=True)[:3]])}
+"""
+            else:
+                forecast_summary = "\nPORTFOLIO FORECASTS: Limited forecast data available for this portfolio."
+
         if style == "concise":
-            return f"""Summarize this portfolio's risk in 3-4 sentences.
+            risky_stocks_str = ", ".join(
+                [f"{t} ({v*100:.1f}%)" for t, v in top_3_risky]
+            )
+
+            return f"""Provide a comprehensive portfolio risk summary in 5-6 sentences, covering both historical performance and forward outlook.
 
 Portfolio: {n} stocks - {ticker_str}
+
+HISTORICAL METRICS:
 • Average Volatility: {avg_vol:.4f} ({avg_vol*100:.2f}%)
 • Average VaR (95%): {avg_var:.4f} ({avg_var*100:.2f}%)
 • Average CVaR (95%): {avg_cvar:.4f} ({avg_cvar*100:.2f}%)
 • Volatility Range: {vol_min:.4f} to {vol_max:.4f}
+• Top 3 Riskiest: {risky_stocks_str}
+{forecast_summary}
 
 Provide:
-1. Overall risk level with the specific volatility number
-2. Diversification quality assessment
-3. Any concentration concerns
-4. Clear recommendation for investor type"""
+1. Overall risk level with specific {avg_vol*100:.2f}% volatility context and comparison to market benchmarks
+2. Historical diversification quality assessment using the {(vol_max-vol_min)*100:.2f} percentage point spread
+3. Forward-looking forecast analysis: is portfolio risk trending up, down, or stable?
+4. Concentration concerns and practical loss scenarios on $100,000
+5. Clear recommendation for investor type and any portfolio adjustments needed
+
+Use all numbers provided and integrate historical patterns with forecast expectations."""
 
         elif style == "detailed":
             risky_stocks_str = ", ".join(
                 [f"{t} ({v*100:.1f}%)" for t, v in top_3_risky]
             )
 
-            return f"""Provide a balanced portfolio risk analysis for both retail and institutional investors.
+            return f"""Provide a comprehensive portfolio risk analysis for both retail and institutional investors, integrating historical performance with forward-looking forecasts.
 
 PORTFOLIO: {n} Securities
 Holdings: {ticker_str}
 
-AGGREGATE METRICS:
-• Average Volatility: {avg_vol:.4f} ({avg_vol*100:.2f}%)
+HISTORICAL METRICS:
+• Average Volatility: {avg_vol:.4f} ({avg_vol*100:.2f}% annualized)
 • Average VaR (95%): {avg_var:.4f} ({avg_var*100:.2f}%)
 • Average CVaR (95%): {avg_cvar:.4f} ({avg_cvar*100:.2f}%)
 • Volatility Range: {vol_min:.4f} ({vol_min*100:.2f}%) to {vol_max:.4f} ({vol_max*100:.2f}%)
-• Std Deviation: {vol_std:.4f}
+• Standard Deviation: {vol_std:.4f}
+• Top 3 Riskiest Holdings: {risky_stocks_str}
+{forecast_summary}
 
-TOP 3 RISKIEST: {risky_stocks_str}
+Write 5-6 comprehensive paragraphs covering:
 
-Write 3-4 concise paragraphs covering:
+1. OVERALL RISK PROFILE & HISTORICAL CONTEXT: 
+   Classify portfolio risk level using the {avg_vol*100:.2f}% average volatility. Compare this to market benchmarks (S&P 500 ~15-18%, high-growth portfolios ~25-30%). What has this portfolio's historical volatility meant in practice? Estimate typical daily portfolio swings. What type of investor has historically succeeded with this risk profile?
 
-1. OVERALL RISK: Classify portfolio risk level using the {avg_vol*100:.2f}% average volatility. Compare to market benchmarks (S&P 500 ~15-18%). What type of investor is this for?
+2. DIVERSIFICATION ANALYSIS: 
+   Evaluate the volatility range from {vol_min*100:.2f}% to {vol_max*100:.2f}%. The {(vol_max-vol_min)*100:.2f} percentage point spread indicates what level of diversification? Is this well-diversified or concentrated? How does the standard deviation of {vol_std*100:.2f}% reflect portfolio construction quality? Discuss whether the portfolio achieves genuine diversification or merely holds multiple correlated assets.
 
-2. DIVERSIFICATION: Evaluate the volatility range ({vol_min*100:.2f}% to {vol_max*100:.2f}%). Is this well-diversified or concentrated? Does the {(vol_max-vol_min)*100:.2f} percentage point spread indicate good risk distribution?
+3. FORWARD-LOOKING FORECAST INTEGRATION: 
+   Analyze the forecast data in detail. How many securities have forecasts? What is the average forecasted volatility ({avg_forecast_vol*100:.2f if forecast_data else 'N/A'}%) compared to current {avg_vol*100:.2f}%? How many holdings show increasing vs decreasing risk? Identify specific securities where forecasts signal major changes. What does the overall forecast trend mean for portfolio risk in coming periods?
 
-3. KEY RISKS: Discuss the riskiest holdings. What % of portfolio do they represent? Are there concentration concerns? On a $100,000 portfolio, what are realistic loss scenarios using VaR and CVaR?
+4. CONCENTRATION RISKS & KEY HOLDINGS: 
+   Deep dive into the riskiest holdings: {risky_stocks_str}. What percentage of the portfolio do these represent? Are there concerning concentrations? How do their individual forecasts look? On a $100,000 portfolio, calculate realistic loss scenarios: use {avg_var*100:.2f}% VaR (95% confidence daily loss limit) and {avg_cvar*100:.2f}% CVaR (average loss in worst 5% of days). Provide dollar amounts.
 
-4. RECOMMENDATIONS: Should any positions be reduced? How should investors monitor this? Rebalancing suggestions? Suitable allocation % of total net worth?
+5. INTEGRATED RISK-RETURN OUTLOOK: 
+   Synthesize historical performance with forecast expectations. If forecasts show rising volatility across the portfolio, what does this mean for risk-adjusted returns? If volatility is moderating, is this a sign of maturing positions or reduced opportunities? How reliable are the forecasts given historical patterns? Should investors view forecasts as actionable signals or merely informational?
 
-Be clear, precise, and actionable. Use all numbers provided. Accessible for both beginners and professionals."""
+6. ACTIONABLE RECOMMENDATIONS: 
+   Should any positions be reduced based on both high historical volatility AND concerning forecasts? Recommend specific rebalancing actions. How should investors monitor this portfolio (daily/weekly/monthly)? What triggers should prompt action (e.g., if volatility exceeds X% or forecasts deteriorate)? Suggest suitable allocation as % of total net worth. Recommend position size limits for riskiest holdings. Consider both current risk and forecasted trends in your recommendations.
+
+Be thorough, precise, and actionable. Use ALL numbers provided. Explicitly connect historical metrics with forecast data to give investors a complete picture. Write in accessible language for both beginners and professionals."""
 
         else:  # technical
-            return f"""Technical portfolio analysis.
+            forecast_metrics = ""
+            if forecast_data:
+                avg_forecast_vol = sum(f["forecast"] for f in forecast_data) / len(
+                    forecast_data
+                )
+                forecast_metrics = f", σ̂ = {avg_forecast_vol:.4f}, Δσ̄ = {sum(f['change'] for f in forecast_data) / len(forecast_data):+.1f}%"
 
-N={n}, σ̄={avg_vol:.4f}, VaR₉₅={avg_var:.4f}, CVaR₉₅={avg_cvar:.4f}
-Range=[{vol_min:.4f}, {vol_max:.4f}], σ(σ)={vol_std:.4f}
+            return f"""Provide comprehensive technical portfolio analysis incorporating realized and forecasted volatility.
 
-Analyze: portfolio risk regime, dispersion characteristics, diversification quality, tail risk, and optimization implications. Keep concise (2-3 paragraphs)."""
+PORTFOLIO METRICS:
+Historical: N={n}, σ̄={avg_vol:.4f}, VaR₉₅={avg_var:.4f}, CVaR₉₅={avg_cvar:.4f}
+Dispersion: Range=[{vol_min:.4f}, {vol_max:.4f}], σ(σ)={vol_std:.4f}
+Forecasts: n_forecasts={len(forecast_data) if forecast_data else 0}{forecast_metrics}
+
+Analyze in 4-5 paragraphs:
+1. Portfolio volatility regime and historical distribution characteristics (tail risk metrics, skewness implications)
+2. Diversification quality: assess dispersion metrics and cross-sectional volatility distribution
+3. Forward volatility analysis: model-based forecasts, consensus outlook, term structure of portfolio volatility
+4. Risk decomposition: identify concentrated exposures, marginal VaR contributions, factor-based risk attribution
+5. Optimization implications: mean-variance efficiency given forecasts, rebalancing triggers, volatility targeting strategies, and optimal hedge ratios
+
+Use quantitative terminology and cite all metrics comprehensively."""
 
 
 def _call_perplexity(prompt: str, token: str, max_retries: int = 3) -> str:
@@ -217,8 +333,14 @@ Your style:
 - Actionable recommendations
 - Balanced tone - honest about risks without being alarmist
 
-Keep analysis concise but comprehensive - quality over quantity.
-And keep it like a normal paragraph, no bullet points, no code style output, no extra *'s or other formatting. If its important, use bold""",
+CRITICAL FORMATTING RULES:
+- Write in normal paragraphs only - NO bullet points, NO numbered lists
+- NEVER use markdown formatting like **bold**, *italic*, or any asterisks
+- For emphasis, use ALL CAPS for important words/phrases (e.g., HIGH RISK, MODERATE VOLATILITY)
+- NO special characters for formatting (no *, _, `, etc.)
+- Keep it clean, professional text only
+
+Keep analysis concise but comprehensive - quality over quantity.""",
             },
             {"role": "user", "content": prompt},
         ],
@@ -444,7 +566,7 @@ Average Volatility: {avg_vol:.2%}
 • Volatility Range: {vol_min:.1%} to {vol_max:.1%}
 • Spread: {vol_range:.1%} percentage points
 
-⚠️  HIGHEST RISK POSITIONS:
+⚠️ HIGHEST RISK POSITIONS:
 {top_risky}
 
 💡 RECOMMENDATION:
