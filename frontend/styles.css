@@ -136,7 +136,6 @@ body {
     transition: all 0.3s ease;
     font-family: inherit;
     color: #e5e7eb;
-    /* ✅ Allow long ticker symbols */
     max-width: 100%;
     word-wrap: break-word;
     overflow-wrap: break-word;
@@ -358,32 +357,63 @@ body {
     color: #22c55e;
 }
 
-/* Chart Section */
+/* ✅ Modernized Chart Section */
 .chart-section {
     margin-bottom: 30px;
-    background: rgba(17, 24, 39, 0.85);
+    background: radial-gradient(1000px 600px at 30% 10%, #0f172a 0%, #0b1320 40%, #0a0f1a 100%);
     border-radius: 15px;
     padding: 25px;
     overflow-x: auto;
-    /* ✅ allow scroll if needed on small screens */
+    position: relative;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(124, 58, 237, 0.25);
 }
 
 .chart-section h3 {
     color: #e5e7eb;
     margin-bottom: 20px;
-    font-size: 1.5rem;
+    font-size: 1.6rem;
+    text-align: center;
+    font-weight: 600;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
 .chart-section canvas {
-    max-width: 100%;
-    height: auto;
+    width: 100% !important;
+    height: auto !important;
     display: block;
+    border-radius: 12px;
+    background: transparent;
+    transition: all 0.3s ease-in-out;
 }
 
-/* ✅ Mobile-specific chart adjustments */
+.chartjs-render-monitor {
+    filter: drop-shadow(0px 0px 6px rgba(255, 255, 255, 0.1));
+}
+
+.chartjs-tooltip {
+    background: rgba(17, 24, 39, 0.95) !important;
+    color: #e5e7eb !important;
+    border-radius: 8px !important;
+    border: 1px solid rgba(124, 58, 237, 0.3) !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    padding: 8px 12px !important;
+    font-size: 0.9rem !important;
+}
+
+.chartjs-legend li span {
+    border-radius: 4px !important;
+}
+
 @media (max-width: 768px) {
     .chart-section {
         padding: 15px;
+        border-radius: 12px;
+    }
+
+    .chart-section h3 {
+        font-size: 1.3rem;
+        margin-bottom: 15px;
     }
 
     .chart-section canvas {
