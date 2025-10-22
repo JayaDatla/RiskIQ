@@ -37,7 +37,9 @@ body {
 .logo i {
     font-size: 2.5rem;
     color: #22c55e;
-    /* emerald */
+    border-radius: 50%;
+    background: rgba(34, 197, 94, 0.1);
+    padding: 8px;
 }
 
 .logo h1 {
@@ -62,7 +64,6 @@ body {
 
 .tab-btn {
     background: rgba(124, 58, 237, 0.15);
-    /* purple overlay */
     border: 2px solid rgba(124, 58, 237, 0.25);
     color: #e5e7eb;
     padding: 15px 30px;
@@ -78,7 +79,7 @@ body {
 }
 
 .tab-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.1);
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
@@ -128,11 +129,13 @@ body {
 .input-group textarea {
     flex: 1;
     padding: 15px 20px;
+    background: rgba(17, 24, 39, 0.8);
     border: 2px solid rgba(124, 58, 237, 0.25);
     border-radius: 10px;
     font-size: 1rem;
     transition: all 0.3s ease;
     font-family: inherit;
+    color: #e5e7eb;
 }
 
 .input-group input:focus,
@@ -148,7 +151,7 @@ body {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #22c55e 0%, #7c3aed 100%);
+    background: linear-gradient(135deg, #22c55e 0%, #3b82f6 100%);
     color: #0b0f1a;
     border: none;
     padding: 15px 30px;
@@ -279,7 +282,7 @@ body {
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #22c55e, #7c3aed);
+    background: linear-gradient(135deg, #22c55e, #3b82f6);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -302,7 +305,7 @@ body {
 }
 
 .metric-desc {
-    color: #666;
+    color: #9ca3af;
     font-size: 0.9rem;
 }
 
@@ -312,7 +315,7 @@ body {
 }
 
 .forecast-section h3 {
-    color: #333;
+    color: #e5e7eb;
     margin-bottom: 20px;
     font-size: 1.5rem;
 }
@@ -324,7 +327,7 @@ body {
 }
 
 .forecast-card {
-    background: linear-gradient(135deg, rgba(31, 41, 55, 0.9) 0%, rgba(17, 24, 39, 0.9) 100%);
+    background: rgba(17, 24, 39, 0.9);
     border-radius: 15px;
     padding: 20px;
     text-align: center;
@@ -368,7 +371,6 @@ body {
 .chart-section canvas {
     max-width: 100%;
     height: auto;
-    /* keep responsive */
 }
 
 /* Summary Section */
@@ -439,7 +441,7 @@ body {
 }
 
 .stocks-analysis h3 {
-    color: #333;
+    color: #e5e7eb;
     margin-bottom: 20px;
     font-size: 1.5rem;
 }
@@ -597,179 +599,16 @@ body {
     }
 }
 
-/* ===== Theme Overrides: Light (White/Black/Orange/Blue) ===== */
-/* These override earlier dark theme choices to match the requested palette. */
-body {
-    background: #FFFFFF;
-    color: #000000;
-}
-
-.header {
-    color: #000000;
-}
-
+/* Make icons round globally */
+i,
+.icon,
+.metric-icon,
 .logo i {
-    color: #FF9900;
+    border-radius: 50%;
+    aspect-ratio: 1 / 1;
 }
 
-.tab-btn {
-    background: #F2F2F2;
-    border: 2px solid #F2F2F2;
-    color: #333333;
-}
-
-.tab-btn.active {
-    background: #FF9900;
-    color: #000000;
-}
-
-.analysis-section {
-    background: #FFFFFF;
-    border: 1px solid #F2F2F2;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.06);
-}
-
-.input-section h2 {
-    color: #000000;
-}
-
-.input-group input,
-.input-group textarea {
-    border: 2px solid #F2F2F2;
-}
-
-.input-group input:focus,
-.input-group textarea:focus {
-    border-color: #0070F3;
-    box-shadow: 0 0 0 3px rgba(0, 112, 243, 0.12);
-}
-
-.btn-primary {
-    background: #FF9900;
-    color: #000000;
-}
-
-.loading {
-    color: #0070F3;
-}
-
-.risk-level-section h3 {
-    color: #000000;
-}
-
-.metric-card {
-    background: #FFFFFF;
-    border: 1px solid #F2F2F2;
-}
-
-.metric-icon {
-    background: linear-gradient(135deg, #FF9900, #0070F3);
-}
-
-.metric-content h4 {
-    color: #333333;
-}
-
-.metric-value {
-    color: #0070F3;
-}
-
-.forecast-card {
-    background: #FFFFFF;
-    border: 2px solid #F2F2F2;
-}
-
-.forecast-card:hover {
-    border-color: #0070F3;
-}
-
-.forecast-card h4 {
-    color: #333333;
-}
-
-.forecast-value {
-    color: #0070F3;
-}
-
-.chart-section {
-    background: #FFFFFF;
-}
-
-.chart-section h3 {
-    color: #000000;
-}
-
-.summary-section {
-    background: #FFFFFF;
-    border-left: 5px solid #FF9900;
-}
-
-.summary-section h3 {
-    color: #000000;
-}
-
-.summary-content {
-    color: #333333;
-}
-
-.portfolio-summary {
-    background: #FFFFFF;
-}
-
-.portfolio-summary h3 {
-    color: #000000;
-}
-
-.stat-item {
-    background: #FFFFFF;
-    border: 1px solid #F2F2F2;
-}
-
-.stat-label {
-    color: #333333;
-}
-
-.stat-value {
-    color: #0070F3;
-}
-
-.stock-card {
-    background: #FFFFFF;
-    border: 1px solid #F2F2F2;
-}
-
-.stock-ticker {
-    color: #000000;
-}
-
-.stock-metric {
-    background: #F2F2F2;
-}
-
-.stock-metric-label {
-    color: #333333;
-}
-
-.stock-metric-value {
-    color: #0070F3;
-}
-
-@media (max-width: 480px) {
-    .logo {
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .logo h1 {
-        font-size: 1.8rem;
-    }
-
-    .metric-card {
-        flex-direction: column;
-        text-align: center;
-    }
-
-    .stock-metrics {
-        grid-template-columns: 1fr;
-    }
+.metric-icon:hover,
+.logo i:hover {
+    box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
 }
