@@ -218,7 +218,7 @@ Your style:
 - Balanced tone - honest about risks without being alarmist
 
 Keep analysis concise but comprehensive - quality over quantity.
-And keep it like a normal paragraph, no bullet points, no code style output.""",
+And keep it like a normal paragraph, no bullet points, no code style output, no extra *'s or other formatting. If its important, use bold""",
             },
             {"role": "user", "content": prompt},
         ],
