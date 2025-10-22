@@ -6,7 +6,7 @@ colorTo: purple
 sdk: docker
 pinned: false
 license: mit
-short_description: AI-powered risk analysis with volatility forecasting for stocks and portfolios
+short_description: AI-powered risk and volatility analysis
 ---
 
 # RiskIQ - Advanced Risk Analysis Platform
