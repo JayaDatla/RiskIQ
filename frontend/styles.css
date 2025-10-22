@@ -136,6 +136,10 @@ body {
     transition: all 0.3s ease;
     font-family: inherit;
     color: #e5e7eb;
+    /* ✅ Allow long ticker symbols */
+    max-width: 100%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .input-group input:focus,
@@ -360,6 +364,8 @@ body {
     background: rgba(17, 24, 39, 0.85);
     border-radius: 15px;
     padding: 25px;
+    overflow-x: auto;
+    /* ✅ allow scroll if needed on small screens */
 }
 
 .chart-section h3 {
@@ -371,6 +377,19 @@ body {
 .chart-section canvas {
     max-width: 100%;
     height: auto;
+    display: block;
+}
+
+/* ✅ Mobile-specific chart adjustments */
+@media (max-width: 768px) {
+    .chart-section {
+        padding: 15px;
+    }
+
+    .chart-section canvas {
+        width: 100% !important;
+        height: auto !important;
+    }
 }
 
 /* Summary Section */
